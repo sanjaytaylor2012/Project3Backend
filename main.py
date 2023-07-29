@@ -12,9 +12,7 @@ import collections
 import random
 import time
 
-CONST_SIMILARITY_THRESHOLD = 0.4
-CONST_NUM_ITEMS = 3
-CONST_MAX_ADJACENT = 10
+
 food_graph = AdjList()
 vectorizer = TfidfVectorizer()
 
@@ -30,7 +28,7 @@ def cosine_sim(str1, str2):
 
 
 def parse_csv():
-    with open("formatted_data.csv", mode="r", encoding="utf8") as file:
+    with open("Project3Backend/formatted_data.csv", mode="r", encoding="utf8") as file:
         csvFile = csv.reader(file)
 
         first_line = True
@@ -63,15 +61,12 @@ def parse_csv():
                         key != food_node.name
                         and cosine_sim(key, food_node.name) > CONST_SIMILARITY_THRESHOLD
                     ):
-                        # print("adding edge: from: ", food_node.name, " to: ", key)
-                        food_graph.addEdge(key, food_node.name)
-                        food_graph.addEdge(food_node.name, key)
+                        print("adding edge: from: ", food_node.name, " to: ", key)
+                        food_graph.addEdge(key, food_node.name + food_node.brand)
+                        food_graph.addEdge(food_node.name + food_node.brand, key)
                         count_nodes += 1
                     if count_nodes > CONST_MAX_ADJACENT:
                         break
-
-
-parse_csv()
 
 
 # count = 0
@@ -87,19 +82,21 @@ def search(word):
     heap = []
     maxCosine = None
     for food in food_graph.graph:
+        food_name = food_graph.graph[food][0].getName()
         currCosine = max(
-            cosine_sim(word, food), maxCosine if maxCosine else cosine_sim(word, food)
+            cosine_sim(food_name, food_name),
+            maxCosine if maxCosine else 0,
         )
-        if currCosine != maxCosine and food != word:
+        if currCosine != maxCosine and food_name != word:
             maxCosine = currCosine
             heapq.heappush(heap, [maxCosine, food])
             if len(heap) > 10:
                 heapq.heappop(heap)
-    heapq.heappop(heap)
     return heap
 
 
 def dfs(heap):
+    print(heap)
     start_time = time.time()
     stack = [heapq.heappop(heap)]
     res = set()
@@ -156,3 +153,10 @@ def dfs(heap):
 #             queue.append(heap[-1])
 #     end_time = time.time()
 #     return res, end_time - start_time
+
+CONST_SIMILARITY_THRESHOLD = 0.4
+CONST_NUM_ITEMS = 100
+CONST_MAX_ADJACENT = 10
+parse_csv()
+node = search("Peanut butter")
+print(dfs(node))

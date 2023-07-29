@@ -22,12 +22,18 @@ class AdjList:
     #         self.graph[(food.name + food.brand)][1] = []
 
     def addEdge(self, _from, _to):
-        self.graph[_from][1].append(_to)
-        self.graph[_to][1].append(_from)
+        from_food = self.graph[_from][0]
+        to_food = self.graph[_to][0]
+
+        self.graph[from_food.name + from_food.brand][1].append(
+            to_food.name + to_food.brand
+        )
+        self.graph[to_food.name + to_food.brand][1].append(
+            from_food.name + from_food.brand
+        )
 
     # {peanuts butter: [Food(Peanut Butter), [Salted Peanuts, Peanut Spread]]}
     def addVertex(self, food):
-        if (food.name) not in self.graph:
-            self.graph[(food.name)] = []
-            self.graph[(food.name)].append(food)
-            self.graph[(food.name)].append([])
+        self.graph[food.name + food.brand] = []
+        self.graph[food.name + food.brand].append(food)
+        self.graph[food.name + food.brand].append([])
